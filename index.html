@@ -9,8 +9,11 @@ html, body {
 path {
   fill: #fff;
 }
-circle {
+.point {
   fill: #333;
+}
+.area {
+  opacity: 0;
 }
 text {
   font-size: 8px;
@@ -72,7 +75,14 @@ d3.json("us.topo.json", function(error, topology) {
       .attr('id', function(d) { return d.Station.toLowerCase().replace(/[^a-z]/gi,'');});
 
       stations.append('circle')
+      .attr('class', 'point')
       .attr('r', 2)
+      .attr('cx', 0)
+      .attr('cy', 0); 
+      
+      stations.append('circle')
+      .attr('class', 'area')
+      .attr('r', 50)
       .attr('cx', 0)
       .attr('cy', 0); 
       
@@ -100,9 +110,16 @@ var showPCData = function() {
             console.log(station);
             var cId = station.stations.toLowerCase().replace(/[^a-z]/gi,'');
             console.log(cId);
-            d3.select('#'+cId).transition().duration(1500)
+            var stationEl = d3.select('#'+cId);
+            stationEl.transition().duration(1500)
               .attr('transform', 'translate('+x(parseFloat(station.PC1))+' '+y(parseFloat(station.PC2))+')')
+            stationEl.transition().delay(1000).duration(300)
               .attr('fill', clusterColors(station.cluster));
+
+            //TODO dynamic radial gradiant defs for colors scale: http://jsfiddle.net/Qh9X5/1110/  
+            stationEl.select('.area').transition().delay(500).duration(1000)
+              .attr('fill', clusterColors(station.cluster))
+              .style('opacity', 0.05);
         });
         d3.select('.map path').transition().duration(1500).attr('stroke','#FFF');
 
@@ -116,6 +133,8 @@ var showMap = function() {
         var p = projection(coord); 
         return p ? 'translate('+p[0]+' '+p[1]+')' : 'translate(0,0)';
       });
+      stations.select('.area').transition().duration(1000)
+          .style('opacity', 0);
       d3.select('.map path').transition().duration(1500).attr('stroke','#ccc');
 }
 document.querySelector('#chk').addEventListener('click', function(e) {
