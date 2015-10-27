@@ -82,7 +82,7 @@ d3.json("us.topo.json", function(error, topology) {
       
       stations.append('circle')
       .attr('class', 'area')
-      .attr('r', 50)
+      .attr('r', 40)
       .attr('cx', 0)
       .attr('cy', 0); 
       
@@ -95,7 +95,7 @@ d3.json("us.topo.json", function(error, topology) {
   
 });
 
-d3.csv('us_pc.csv', function(error, pcd) {
+d3.csv('us_pc_alldata.csv', function(error, pcd) {
   
   pcdata = pcd;
 
@@ -119,7 +119,7 @@ var showPCData = function() {
             //TODO dynamic radial gradiant defs for colors scale: http://jsfiddle.net/Qh9X5/1110/  
             stationEl.select('.area').transition().delay(500).duration(1000)
               .attr('fill', clusterColors(station.cluster))
-              .style('opacity', 0.05);
+              .style('opacity', 0.15);
         });
         d3.select('.map path').transition().duration(1500).attr('stroke','#FFF');
 
