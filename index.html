@@ -84,7 +84,13 @@ d3.json("us.topo.json", function(error, topology) {
         var p = projection(coord); 
         return p ? 'translate('+p[0]+' '+p[1]+')' : 'translate(0,0)';
       })
-      .attr('id', function(d) { return d.Station.toLowerCase().replace(/[^a-z]/gi,'');});
+      .attr('id', function(d) { return d.Station.toLowerCase().replace(/[^a-z]/gi,'');})
+      /*
+      .on('mouseenter', function(d ,i) {
+          //console.log(d3.select(this), d3.select(this).select('text'));
+          d3.select(this).select('text').style('fill', 'black');
+      });
+      */
 
       stations.append('circle')
       .attr('class', 'point')
@@ -101,7 +107,7 @@ d3.json("us.topo.json", function(error, topology) {
       stations.append('text')
         .text(function(d) { return d.Station })
         .attr('x', 4)
-        .attr('y', 4);
+        .attr('y', 4)
       
   });
   
