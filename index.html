@@ -11,6 +11,7 @@ path {
 }
 .point {
   fill: #333;
+  opacity: .8;
 }
 .area {
   opacity: 0;
@@ -44,10 +45,21 @@ var svg = d3.select("body").append("svg")
     .attr("width", width)
     .attr("height", height);
 
-var clusterColors = d3.scale.category10();
+var clusterColors = d3.scale.category10();//.domain([0,9]);
+
+var grads = svg.append('defs').selectAll('.gradients').data(clusterColors.range())
+      .enter()
+      .append('radialGradient')
+      //.attr("cx", 0)
+      //.attr("cy", 0)
+      //.attr("r", "80%")
+      .attr("id", function(d, i) { return "grad" + (i); });
+
+grads.append("stop").attr("offset", "0%").style("stop-color", function(d, i) { return clusterColors(i); });
+grads.append("stop").attr("offset", "100%").style("stop-color", "white").attr('stop-opacity', 0);
 
 var x = d3.scale.linear().range([ 30, width- 30 ]),
-    y = d3.scale.linear().range([30, height -30]);
+    y = d3.scale.linear().range([50, height -30]);
 
 var pcdata, coord, stations;
 
@@ -76,13 +88,13 @@ d3.json("us.topo.json", function(error, topology) {
 
       stations.append('circle')
       .attr('class', 'point')
-      .attr('r', 2)
+      .attr('r', 1)
       .attr('cx', 0)
       .attr('cy', 0); 
       
       stations.append('circle')
       .attr('class', 'area')
-      .attr('r', 40)
+      .attr('r', 70)
       .attr('cx', 0)
       .attr('cy', 0); 
       
@@ -107,10 +119,10 @@ d3.csv('us_pc_alldata.csv', function(error, pcd) {
 
 var showPCData = function() {
         pcdata.forEach(function(station) {
-            console.log(station);
             var cId = station.stations.toLowerCase().replace(/[^a-z]/gi,'');
-            console.log(cId);
             var stationEl = d3.select('#'+cId);
+
+
             stationEl.transition().duration(1500)
               .attr('transform', 'translate('+x(parseFloat(station.PC1))+' '+y(parseFloat(station.PC2))+')')
             stationEl.transition().delay(1000).duration(300)
@@ -118,8 +130,9 @@ var showPCData = function() {
 
             //TODO dynamic radial gradiant defs for colors scale: http://jsfiddle.net/Qh9X5/1110/  
             stationEl.select('.area').transition().delay(500).duration(1000)
-              .attr('fill', clusterColors(station.cluster))
-              .style('opacity', 0.15);
+              //.attr('fill', clusterColors(station.cluster))
+              .attr('fill', "url(#grad" + station.cluster + ")")
+              .style('opacity', 0.2);
         });
         d3.select('.map path').transition().duration(1500).attr('stroke','#FFF');
 
