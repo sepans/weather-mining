@@ -2,10 +2,11 @@ var ForecastIo = require('forecastio');
 var fs = require('fs');
 var csv = require("fast-csv");
 
-var filename = 'test.csv';
+var outFileName = '../data/allAirportData.csv',
+    coordinatesFileName = '../data/intl_airports.csv';
 
 var csvStream = csv.createWriteStream({headers: true}),
-        writableStream = fs.createWriteStream(filename);
+        writableStream = fs.createWriteStream(outFileName);
 
 csvStream.pipe(writableStream);
 
@@ -26,7 +27,7 @@ var stationList;// = JSON.parse(fs.readFileSync('us-stations.json', 'utf8'));
 var index = 0;
 
 csv
- .fromPath("large_airports.csv", {headers: true})
+ .fromPath(coordinatesFileName, {headers: true})
   .on("data", function(data){
     //stationList = data;
     
@@ -35,16 +36,16 @@ csv
    // console.log(data);
   })
  .on("end", function(){
-        console.log("done");
+        console.log("done reading coordinates");
   });
 
 
 var allData = [],
     monthData = [];
 
-var queryForecastio = true,
-    daysToCollect = 3;// 365,
-    stationNum = 2;//stationList.length;
+var queryForecastio = false,
+    daysToCollect = 365,
+    stationNum = 400;//stationList.length;
 
 var year = 2008,
     curMonth = 0;
@@ -59,7 +60,7 @@ function processRow(station, i) {
   //for(var i = 0; i< stationNum; i++) {
     
     //var station = stationList[i];
-    console.log('station',station, i);
+    //console.log('station',station, i);
     
     var curDate = new Date(year, curMonth, 1, 0, 0, 0);
 
@@ -76,10 +77,17 @@ function processRow(station, i) {
           //console.log(data.daily.data[0]);
            
           //monthData.push(data.daily.data[0]);
+          if(err || !data.daily) {
+            console.log(i, station.municipality);
+            console.log(err);
+            return;
+          }
           var dailyData = data.daily.data[0];
           
           var formattedDate = this.date;//new Date(dailyData.time).toISOString();
-          dailyData.station = station.station.toLowerCase();
+          dailyData.station = station.municipality;
+          dailyData.region = station.iso_region;
+          dailyData.country = station.iso_country;
           dailyData.lat = station.lat;
           dailyData.long = station.long;
           dailyData.formatteddate = formattedDate.toISOString();
@@ -90,7 +98,7 @@ function processRow(station, i) {
           //console.log(JSON.stringify(data, null, 2));
           //console.log(i, dayOffset);
 
-          console.log('writing data');
+          console.log('writing data '+station.municipality+' '+formattedDate);
           csvStream.write(dailyData);
           
           if(allData.length >= stationNum * daysToCollect ) {

@@ -7,8 +7,11 @@ var csv = require("fast-csv"),
 
 var transformed = [];
 
+var inputFile = '../data/allAirportData.csv',
+    outputFile = '../data/grouped_airport.csv';
+
 csv
- .fromPath('alldata.csv', {headers: true})
+ .fromPath(inputFile, {headers: true})
   .on("data", function(data){
          //console.log('dd', data);
          transformed.push(data);
@@ -63,7 +66,7 @@ function save() {
   console.log(results);
   
   csv
-     .writeToStream(fs.createWriteStream("grouped-us.csv"), results, {headers: true});
+     .writeToStream(fs.createWriteStream(outputFile), results, {headers: true});
 }
 
 function avg(numbers) {
