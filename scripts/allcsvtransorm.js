@@ -8,7 +8,7 @@ var csv = require("fast-csv"),
 var transformed = [];
 
 var inputFile = '../data/allAirportData.csv',
-    outputFile = '../data/grouped_airport2.csv';
+    outputFile = '../data/no_pressure.csv';
 
 csv
  .fromPath(inputFile, {headers: true})
@@ -36,7 +36,7 @@ function save() {
                     avgTemperatureMax: avg(_.pluck(value1, "temperatureMax")),
                     cloudCover: avg(_.pluck(value1, "cloudCover")),
                     visibility: avg(_.pluck(value1, "visibility")),
-                    pressure: avg(_.pluck(value1, "pressure")),
+                    //pressure: avg(_.pluck(value1, "pressure")),
                     windSpeed: avg(_.pluck(value1, "windSpeed")),
                     dewPoint: avg(_.pluck(value1, "dewPoint")),
                     monthYear: monthYear
@@ -56,7 +56,7 @@ function save() {
       ret['tempMax-'+cur.monthYear] = cur.avgTemperatureMax;
       ret['cloudCover-'+cur.monthYear] = cur.cloudCover;
       ret['visibility-'+cur.monthYear] = cur.visibility;
-      ret['pressure-'+cur.monthYear] = cur.pressure;
+      //ret['pressure-'+cur.monthYear] = cur.pressure;
       ret['windSpeed-'+cur.monthYear] = cur.windSpeed;
       ret['dewPoint-'+cur.monthYear] = cur.dewPoint;
     });
