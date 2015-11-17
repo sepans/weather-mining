@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+html, body {
+  font-family: open-sans, sans-serif, arial;
+  font-size: 14px;
+}
+path {
+  fill: #fff;
+}
+.point {
+  fill: #333;
+  opacity: .8;
+}
+.area {
+  opacity: 0;
+}
+text {
+  font-size: 8px;
+  font-family: open-sans, sans-serif, arial;
+}
+</style>
+<body>
+  <h1>Non-geographical weather map of US</h1>
+  Method: <a href="method.html">PCA and KMeans on historical tempreture data</a>
+  <br>
+  <label>Cluster weather data: </label><input id="chk" type="checkbox"/>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.19/topojson.min.js"></script>
+<script>
+
+var width = 1260,
+    height = 800;
+
+var projection = d3.geo.mercator()
+         .scale((width + 1) / 2 / Math.PI)
+         .translate([width / 2, height / 2])
+         .precision(.1);
+        //.center([0, 5 ])
+        //.scale(200)
+        //.rotate([-180,0]);//.scale(1000)
+        
+        //.translate([width / 2, height / 2]);
+
+var path = d3.geo.path()
+          .projection(projection);
+
+var svg = d3.select("body").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+var clusterColors = d3.scale.category10();//.domain([0,9]);
+
+var grads = svg.append('defs').selectAll('.gradients').data(clusterColors.range())
+      .enter()
+      .append('radialGradient')
+      //.attr("cx", 0)
+      //.attr("cy", 0)
+      //.attr("r", "80%")
+      .attr("id", function(d, i) { return "grad" + (i); });
+
+grads.append("stop").attr("offset", "0%").style("stop-color", function(d, i) { return clusterColors(i); });
+grads.append("stop").attr("offset", "100%").style("stop-color", "white").attr('stop-opacity', 0);
+
+var x = d3.scale.linear().range([ 30, width- 30 ]),
+    y = d3.scale.linear().range([0, height]);
+
+var pcdata, coord, stations;
+
+d3.json("world.topo.json", function(error, topology) {
+  if (error) throw error;
+  svg.append('g')
+     .attr('class', 'map')
+     .append("path")
+      .datum(topojson.feature(topology, topology.objects.land))
+      .attr('stroke', '#ccc')
+      .attr("d", path);
+      
+  d3.csv('data/intl_airports.csv', function(error, cdata) {
+    coords = cdata;
+
+    stations = svg.append('g')
+      .attr('class','stations')
+      .selectAll('.station').data(coords).enter()
+      .append('g')
+      .attr('transform', function(d) {
+        console.log(d);
+        var coord =[parseFloat(d.long), parseFloat(d.lat)];
+        var p = projection(coord); 
+        return p ? 'translate('+p[0]+' '+p[1]+')' : 'translate(0,0)';
+      })
+      .attr('id', function(d) { return d.municipality.toLowerCase().replace(/[^a-z]/gi,'');})
+      /*
+      .on('mouseenter', function(d ,i) {
+          //console.log(d3.select(this), d3.select(this).select('text'));
+          d3.select(this).select('text').style('fill', 'black');
+      });
+      */
+
+      stations.append('circle')
+      .attr('class', 'point')
+      .attr('r', 1)
+      .attr('cx', 0)
+      .attr('cy', 0); 
+      
+      stations.append('circle')
+      .attr('class', 'area')
+      .attr('r', 70)
+      .attr('cx', 0)
+      .attr('cy', 0); 
+      
+      stations.append('text')
+        .text(function(d) { return d.municipality })
+        .attr('x', 4)
+        .attr('y', 4)
+      
+  });
+  
+});
+
+d3.csv('data/world_pc.csv', function(error, pcd) {
+  
+  pcdata = pcd;
+
+  x.domain(d3.extent(pcdata, function(d) { return parseFloat(d.PC1); }));
+  y.domain(d3.extent(pcdata, function(d) { return parseFloat(d.PC2); }));
+
+});
+
+
+var showPCData = function() {
+        pcdata.forEach(function(station) {
+          var cId = station.city.toLowerCase().replace(/[^a-z]/gi,'');
+            if(!cId) {
+              console.log(cId);
+              return;
+            }  
+            var stationEl = d3.select('#'+cId);
+
+
+            stationEl.transition().duration(1500)
+              .attr('transform', 'translate('+x(parseFloat(station.PC1))+' '+y(parseFloat(station.PC2))+')')
+            stationEl.transition().delay(1000).duration(300)
+              .attr('fill', clusterColors(station.cluster));
+
+            //TODO dynamic radial gradiant defs for colors scale: http://jsfiddle.net/Qh9X5/1110/  
+            stationEl.select('.area').transition().delay(500).duration(1000)
+              //.attr('fill', clusterColors(station.cluster))
+              .attr('fill', "url(#grad" + station.cluster + ")")
+              .style('opacity', 0.2);
+        });
+        d3.select('.map path').transition().duration(1500).attr('stroke','#FFF');
+
+}
+
+var showMap = function() {
+
+
+     stations.transition().duration(1500).attr('transform', function(d) {
+        var coord =[parseFloat(d.long), parseFloat(d.lat)];
+        var p = projection(coord); 
+        return p ? 'translate('+p[0]+' '+p[1]+')' : 'translate(0,0)';
+      });
+      stations.select('.area').transition().duration(1000)
+          .style('opacity', 0);
+      d3.select('.map path').transition().duration(1500).attr('stroke','#ccc');
+}
+document.querySelector('#chk').addEventListener('click', function(e) {
+  if(e.target.checked) {
+    showPCData();
+  }
+  else {
+    showMap();
+  }
+});
+
+
+</script>
+
