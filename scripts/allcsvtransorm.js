@@ -8,7 +8,7 @@ var csv = require("fast-csv"),
 var transformed = [];
 
 var inputFile = '../data/allAirportData.csv',
-    outputFile = '../data/grouped_airport.csv';
+    outputFile = '../data/grouped_airport2.csv';
 
 csv
  .fromPath(inputFile, {headers: true})
@@ -46,7 +46,7 @@ function save() {
     })
     .value();
 
-  console.log('writing ', grouped[0], grouped[1]);
+  //console.log('writing ', grouped[0], grouped[1]);
   
   var results = grouped.map(function(stationArray) {
     var ret = {};
@@ -63,14 +63,23 @@ function save() {
     return ret;
   });
 
-  console.log(results);
+  //console.log(results);
   
   csv
      .writeToStream(fs.createWriteStream(outputFile), results, {headers: true});
 }
 
 function avg(numbers) {
+    var invalid = 0;
     return _.reduce(numbers, function(result, current) {
-        return result + parseFloat(current);
-    }, 0)/numbers.length;
+        if(Number(current))
+        {
+          return result + parseFloat(current);
+        }
+        else {
+          invalid++;
+          console.log(current+' is invalid '+invalid);
+          return result;
+        }
+    }, 0)/(numbers.length - invalid);
 }
