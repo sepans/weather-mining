@@ -101,6 +101,19 @@ d3.json("world.topo.json", function(error, topology) {
   d3.csv('data/intl_airports.csv', function(error, cdata) {
     coords = cdata;
 
+      areas = container
+      .append('g')
+      .attr('class','areas')
+        .selectAll('.circle').data(coords).enter().append('circle')
+        .attr('class', function(d) { return 'area area-'+ d.municipality.toLowerCase().replace(/[^a-z]/gi,''); })
+        .attr('transform', function(d) {
+          var coord =[parseFloat(d.long), parseFloat(d.lat)];
+          var p = projection(coord); 
+          return p ? 'translate('+p[0]+' '+p[1]+')' : 'translate(0,0)';
+        })
+        .attr('r', 70)
+        .attr('cx', 0)
+        .attr('cy', 0); 
     
     stations = container.append('g')
       .attr('class','stations')
@@ -125,11 +138,6 @@ d3.json("world.topo.json", function(error, topology) {
       .attr('cx', 0)
       .attr('cy', 0); 
       
-      stations.append('circle')
-      .attr('class', 'area')
-      .attr('r', 70)
-      .attr('cx', 0)
-      .attr('cy', 0); 
       
       stations.append('text')
         .text(function(d) { return d.municipality })
@@ -159,6 +167,8 @@ var showPCData = function() {
             }  
             var stationEl = d3.select('#'+cId);
 
+            var areaEl = d3.select('.area-'+cId);
+
 
             stationEl.transition().duration(1500)
               .attr('transform', 'translate('+x(parseFloat(station.PC1))+' '+y(parseFloat(station.PC2))+')')
@@ -166,7 +176,9 @@ var showPCData = function() {
               .attr('fill', clusterColors(station.cluster));
 
             //TODO dynamic radial gradiant defs for colors scale: http://jsfiddle.net/Qh9X5/1110/  
-            stationEl.select('.area').transition().delay(500).duration(1000)
+            
+            areaEl.transition().delay(500).duration(1000)
+              .attr('transform', 'translate('+x(parseFloat(station.PC1))+' '+y(parseFloat(station.PC2))+')')
               //.attr('fill', clusterColors(station.cluster))
               .attr('fill', "url(#grad" + station.cluster + ")")
               .style('opacity', 0.2);
@@ -183,7 +195,10 @@ var showMap = function() {
         var p = projection(coord); 
         return p ? 'translate('+p[0]+' '+p[1]+')' : 'translate(0,0)';
       });
-      stations.select('.area').transition().duration(1000)
+
+      //var areaEl = d3.select('.area-'+cId);
+
+      areas.transition().duration(1000)
           .style('opacity', 0);
       d3.select('.map path').transition().duration(1500).attr('stroke','#ccc');
 }
