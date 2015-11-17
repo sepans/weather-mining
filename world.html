@@ -16,6 +16,10 @@ path {
 .area {
   opacity: 0;
 }
+.overlay {
+  fill: none;
+  pointer-events: all;
+}
 text {
   font-size: 8px;
   font-family: open-sans, sans-serif, arial;
@@ -51,6 +55,20 @@ var svg = d3.select("body").append("svg")
     .attr("width", width)
     .attr("height", height);
 
+var container = svg.append('g').attr('class','container');
+
+var zoom = d3.behavior.zoom()
+    .translate([0, 0])
+    .scale(1)
+    .scaleExtent([1, 8])
+    .on("zoom", zoomed);
+
+svg.append("rect")
+    .attr("class", "overlay")
+    .attr("width", width)
+    .attr("height", height)
+    .call(zoom);
+
 var clusterColors = d3.scale.category10();//.domain([0,9]);
 
 var grads = svg.append('defs').selectAll('.gradients').data(clusterColors.range())
@@ -71,22 +89,24 @@ var pcdata, coord, stations;
 
 d3.json("world.topo.json", function(error, topology) {
   if (error) throw error;
-  svg.append('g')
+  container.append('g')
      .attr('class', 'map')
      .append("path")
       .datum(topojson.feature(topology, topology.objects.land))
       .attr('stroke', '#ccc')
       .attr("d", path);
+
+      
       
   d3.csv('data/intl_airports.csv', function(error, cdata) {
     coords = cdata;
 
-    stations = svg.append('g')
+    
+    stations = container.append('g')
       .attr('class','stations')
       .selectAll('.station').data(coords).enter()
       .append('g')
       .attr('transform', function(d) {
-        console.log(d);
         var coord =[parseFloat(d.long), parseFloat(d.lat)];
         var p = projection(coord); 
         return p ? 'translate('+p[0]+' '+p[1]+')' : 'translate(0,0)';
@@ -167,6 +187,15 @@ var showMap = function() {
           .style('opacity', 0);
       d3.select('.map path').transition().duration(1500).attr('stroke','#ccc');
 }
+
+function zoomed() {
+  console.log('zoom ',d3.event);
+  container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+  stations.selectAll('text').style('font-size', (8/d3.event.scale)+'px');
+  //features.select(".state-border").style("stroke-width", 1.5 / d3.event.scale + "px");
+  //features.select(".county-border").style("stroke-width", .5 / d3.event.scale + "px");
+}
+
 document.querySelector('#chk').addEventListener('click', function(e) {
   if(e.target.checked) {
     showPCData();
