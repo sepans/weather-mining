@@ -31,8 +31,8 @@ text {
   <br>
   <label>Cluster weather data: </label><input id="chk" type="checkbox"/>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.19/topojson.min.js"></script>
+<script src="lib/d3.min.js"></script>
+<script src="lib/topojson.min.js"></script>
 <script>
 
 var width = 1260,
@@ -169,16 +169,20 @@ var showPCData = function() {
 
             var areaEl = d3.select('.area-'+cId);
 
+            var transform = 'translate('+x(parseFloat(station.PC1))+' '+y(parseFloat(station.PC2))+')';
+
+            console.log(transform);
+
 
             stationEl.transition().duration(1500)
-              .attr('transform', 'translate('+x(parseFloat(station.PC1))+' '+y(parseFloat(station.PC2))+')')
+              .attr('transform', transform)
             stationEl.transition().delay(1000).duration(300)
               .attr('fill', clusterColors(station.cluster));
 
             //TODO dynamic radial gradiant defs for colors scale: http://jsfiddle.net/Qh9X5/1110/  
             
             areaEl.transition().delay(500).duration(1000)
-              .attr('transform', 'translate('+x(parseFloat(station.PC1))+' '+y(parseFloat(station.PC2))+')')
+              .attr('transform', transform)
               //.attr('fill', clusterColors(station.cluster))
               .attr('fill', "url(#grad" + station.cluster + ")")
               .style('opacity', 0.2);
