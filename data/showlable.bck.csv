@@ -1,0 +1,305 @@
+municipality,show_label
+Nassau,1
+Belize City,1
+Calgary,1
+Edmonton,1
+Vancouver,1
+Victoria,0
+Winnipeg,1
+St. John's,1
+Halifax,1
+Ottawa,1
+Toronto,1
+Montréal,1
+Quebec,1
+Havana,1
+Varadero,0
+Santo Domingo,0
+Punta Cana,0
+Kingston,1
+Georgetown,1
+Tijuana,0
+San José del Cabo,1
+Mexico City,1
+Acapulco,1
+Guadalajara,0
+Puerto Vallarta,1
+Monterrey,1
+Cancún,1
+Hermosillo,1
+Tocumen,1
+San Juan,1
+Saint Martin,0
+Anchorage,1
+Fairbanks,1
+Huntsville,1
+Phoenix,1
+Tucson,1
+Los Angeles,1
+Ontario,0
+Sacramento,1
+San Diego,1
+San Francisco,1
+San Jose,0
+Denver,1
+Hartford,0
+Washington,1
+Jacksonville,1
+Miami,1
+Orlando,1
+Tampa,1
+Atlanta,1
+Savannah,0
+Des Moines,0
+Chicago,1
+Moline,0
+Peoria,0
+Fort Wayne,0
+Indianapolis,1
+Cincinnati,0
+Louisville,0
+New Orleans,1
+Boston,1
+Baltimore,0
+Bangor,0
+Saginaw,0
+Duluth,1
+Minneapolis,1
+Kansas City,1
+St Louis,1
+Gulfport,0
+Jackson,1
+Billings,1
+Charlotte,1
+Greensboro,0
+Raleigh/Durham,0
+Newark,0
+Albuquerque,1
+Las Vegas,1
+Reno,1
+Buffalo,0
+New York,1
+Rochester,0
+Cleveland,0
+Columbus,0
+Dayton,0
+Tulsa,1
+Erie,0
+Philadelphia,1
+Pittsburgh,1
+Charleston,1
+Greenville,0
+Memphis,1
+Nashville,1
+Houston,1
+Austin,1
+Dallas-Fort Worth,1
+San Antonio,0
+Salt Lake City,1
+Newport News,0
+Norfolk,0
+Richmond,1
+Seattle,1
+Spokane,1
+Green Bay,1
+Milwaukee,1
+Casper,1
+Hurghada,1
+Cairo,1
+Addis Ababa,1
+Accra,1
+Nairobi,1
+Mombasa,1
+Tripoli,1
+Casablanca,1
+Uyo,1
+Abuja,1
+Lagos,1
+Khartoum,1
+Dakar,1
+Juba,1
+Tunis,1
+Enfidha,1
+Johannesburg,1
+Durban,1
+Cape Town,1
+Abu Dhabi,0
+Dubai,1
+Jebel Ali,0
+Sharjah,0
+Yerevan,1
+Baku,1
+Manama,0
+Bandar Seri Begawan,1
+Beijing,1
+Tianjin,1
+Shanghai,1
+Hangzhou,1
+Ningbo,0
+Fuzhou,1
+Xiamen,1
+Zhengzhou,1
+Wuhan,1
+Changsha,1
+Guangzhou,1
+Shenzhen,0
+Guilin City,1
+Haikou,1
+Sanya,1
+Chongqing,1
+Chengdu,1
+Kunming,1
+Xianyang,1
+Ürümqi,1
+Larnarca,1
+Paphos,0
+Tbilisi,1
+Hong Kong,1
+Denpasar-Bali Island,1
+Jakarta,1
+Surabaya,1
+Samarinda,1
+Ujung Pandang-Celebes Island,1
+,1
+Eilat,1
+Tel Aviv,1
+New Delhi,1
+Bangalore,1
+Calicut,1
+Cochin,1
+Thiruvananthapuram,1
+Mumbai,1
+Amritsar,1
+Chennai,1
+Hyderabad,1
+Kolkata,1
+Basrah,1
+Baghdad,1
+Tabriz,1
+Tehran,1
+Shiraz,1
+Mashhad,1
+Amman,1
+Tokyo,1
+Tokoname,1
+Osaka,1
+Bishkek,1
+Siem Reap,1
+Phnom Penh,1
+Busan,1
+Seoul,1
+Cheongju,1
+Muan,1
+Jeju City,1
+Kuwait City,1
+Astana,1
+Beirut,1
+Colombo,1
+,1
+Mandalay,1
+Yangon,1
+Taipa,1
+Malé,1
+Kuala Lumpur,1
+Muscat,1
+Duqm,1
+Lapu-Lapu City,1
+Davao City,1
+Angeles City,0
+Manila,1
+Islamabad,1
+Doha,1
+Riyadh,1
+Jeddah,1
+Ad Dammam,0
+Singapore,1
+Damascus,1
+Aleppo,1
+Latakia,1
+Bangkok,1
+Chiang Mai,1
+Ankara,1
+Antalya,0
+İzmir,1
+Kaohsiung City,1
+Taipei,1
+Tashkent,1
+Hanoi,1
+Ho Chi Minh City,1
+Da Nang,1
+Tirana,1
+Vienna,1
+Sarajevo,1
+Plovdiv,1
+Geneva,1
+Prague,1
+Berlin,1
+Munich,1
+Frankfurt-am-Main,1
+Düsseldorf,1
+Barcelona,1
+Alicante,1
+Paris,1
+Birmingham,1
+Bristol,1
+Exeter,1
+Norwich,0
+Belfast,1
+Glasgow,1
+Cardiff,0
+Thessaloniki,1
+Heraklion,1
+Athens,1
+Budapest,1
+Reykjavík,1
+Milan,1
+Pisa,1
+Venice,1
+Roma,1
+Nápoli,1
+Prishtina,1
+Vilnius,1
+Luxembourg,0
+Riga,1
+Luqa,1
+Kraków,1
+Katowice,0
+Bucharest,1
+Ufa,1
+Sochi,1
+Moscow,1
+Samara,1
+Kazan,1
+Istanbul,1
+Donetsk,1
+Kiev,1
+Simferopol,1
+Odessa,1
+Kharkiv,1
+Canberra,1
+Sydney,1
+Brisbane,1
+Melbourne,1
+Perth,1
+Avarua,1
+"Hagåtña, Guam International Airport",1
+Auckland,1
+Christchurch,1
+Wellington,1
+Port Moresby,1
+Buenos Aires,1
+Salvador,1
+Brasília,1
+Belo Horizonte,1
+Belém,1
+Rio De Janeiro,1
+Natal,1
+Florianópolis,1
+São Paulo,1
+Santiago,1
+Bogota,1
+Quito,1
+Latacunga,1
+Cusco,1
+Lima,1
+Montevideo,1
