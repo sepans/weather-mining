@@ -24,9 +24,12 @@ text {
   font-size: 8px;
   font-family: open-sans, sans-serif, arial;
 }
+text.no-label {
+  opacity: 0;
+}
 </style>
 <body>
-  <h1>Non-geographical weather map of US</h1>
+  <h2>Non-geographical weather map of the world</h2>
   Method: <a href="method.html">PCA and KMeans on historical tempreture data</a>
   <br>
   <label>Cluster weather data: </label><input id="chk" type="checkbox"/>
@@ -82,7 +85,7 @@ var grads = svg.append('defs').selectAll('.gradients').data(clusterColors.range(
 grads.append("stop").attr("offset", "0%").style("stop-color", function(d, i) { return clusterColors(i); });
 grads.append("stop").attr("offset", "100%").style("stop-color", "white").attr('stop-opacity', 0);
 
-var x = d3.scale.linear().range([ 30, width- 30 ]),
+var x = d3.scale.linear().range([ 50, width- 50 ]),
     y = d3.scale.linear().range([50, height - 50]);
 
 var pcdata, coord, stations;
@@ -141,6 +144,10 @@ d3.json("world.topo.json", function(error, topology) {
       
       stations.append('text')
         .text(function(d) { return d.municipality })
+        .attr('class', function(d) { 
+            console.log(d.municipality, d.show_label, (Boolean(d.show_label) ? '' : 'no-label') );
+            return d.show_label==='true' ? '' : 'no-label';
+        })
         .attr('x', 4)
         .attr('y', 4)
       
