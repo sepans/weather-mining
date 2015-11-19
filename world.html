@@ -36,7 +36,7 @@ text {
 <script>
 
 var width = 1260,
-    height = 800;
+    height = 700;
 
 var projection = d3.geo.mercator()//.equirectangular() 
          .scale((width + 1) / 2 / Math.PI)
@@ -83,7 +83,7 @@ grads.append("stop").attr("offset", "0%").style("stop-color", function(d, i) { r
 grads.append("stop").attr("offset", "100%").style("stop-color", "white").attr('stop-opacity', 0);
 
 var x = d3.scale.linear().range([ 30, width- 30 ]),
-    y = d3.scale.linear().range([0, height]);
+    y = d3.scale.linear().range([50, height - 50]);
 
 var pcdata, coord, stations;
 
