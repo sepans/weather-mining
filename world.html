@@ -18,21 +18,46 @@ path {
 }
 .overlay {
   fill: none;
-  pointer-events: all;
+  /*pointer-events: all;*/
 }
 text {
   font-size: 8px;
   font-family: open-sans, sans-serif, arial;
 }
+.text-g text {
+  transition: all 0.1s;
+}
+.text-g:hover text {
+  font-size: 12px;
+  fill: #333;
+}
+
 text.no-label {
   opacity: 0;
+  transition: opacity 0.3s;
 }
+text.no-label:hover {
+  opacity: 1;
+}
+
+.text-bkg {
+  transition: opacity 0.3s;
+  fill: #FFF;
+  opacity: 0;
+}
+.text-g:hover .text-bkg {
+ /* opacity: 0.8;*/
+  
+}
+
 </style>
 <body>
   <h2>Non-geographical weather map of the world</h2>
-  Method: <a href="method.html">PCA and KMeans on historical tempreture data</a>
-  <br>
   <label>Cluster weather data: </label><input id="chk" type="checkbox"/>
+  <div id="viz"></div>
+  <div class="credits">
+    Method: <a href="method.html">PCA and KMeans on historical tempreture data</a>  | <span>Weather data: <a href="#">forecast.io</a>
+  </div>
 
 <script src="lib/d3.min.js"></script>
 <script src="lib/topojson.min.js"></script>
@@ -54,7 +79,7 @@ var projection = d3.geo.mercator()//.equirectangular()
 var path = d3.geo.path()
           .projection(projection);
 
-var svg = d3.select("body").append("svg")
+var svg = d3.select("#viz").append("svg")
     .attr("width", width)
     .attr("height", height);
 
@@ -122,6 +147,8 @@ d3.json("world.topo.json", function(error, topology) {
       .attr('class','stations')
       .selectAll('.station').data(coords).enter()
       .append('g')
+      .attr('class','text-g')
+      .attr('fill', '#555')
       .attr('transform', function(d) {
         var coord =[parseFloat(d.long), parseFloat(d.lat)];
         var p = projection(coord); 
@@ -141,6 +168,12 @@ d3.json("world.topo.json", function(error, topology) {
       .attr('cx', 0)
       .attr('cy', 0); 
       
+      stations.append('rect')
+        .attr('class','text-bkg')
+        .attr('x', 0)
+        .attr('y', -3)
+        .attr('width', function(d) {return 50; })
+        .attr('height', function(d) {return 12; });
       
       stations.append('text')
         .text(function(d) { return d.municipality })
@@ -149,7 +182,9 @@ d3.json("world.topo.json", function(error, topology) {
             return d.show_label==='true' ? '' : 'no-label';
         })
         .attr('x', 4)
-        .attr('y', 4)
+        .attr('y', 4);
+
+        
       
   });
   
