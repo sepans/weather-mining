@@ -10,7 +10,7 @@ path {
   fill: #fff;
 }
 .point {
-  fill: #333;
+  fill: none;
   opacity: .8;
 }
 .area {
@@ -26,6 +26,22 @@ text {
 .info {
   margin-top: 5px;
 }
+
+.label {
+
+}
+.shadow {
+
+}
+
+.arrow {
+  opacity: 0;
+  fill: none;
+}
+
+.map-point {
+  opacity: 0;
+}
 </style>
 <body>
   <h1>Non-geographical weather map of US</h1>
@@ -33,6 +49,7 @@ text {
   <div class="info">Method: <a href="method.html" target="_black">PCA and KMeans on historical tempreture data</a></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+<script src="https://d3js.org/d3-queue.v3.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.19/topojson.min.js"></script>
 <script>
 
@@ -59,7 +76,7 @@ var clusterColors = d3.scale.ordinal()
     '#DB9A4A', 
     '#4DAAD5',//blue
     '#59C2A8',//green
-    '#ABD1D6',
+    '#6DC6D0',//'#ABD1D6',
     '#2E4E6A',
     '#CFB951',//yellowish
 
@@ -84,137 +101,229 @@ var margin = 65;
 var x = d3.scale.linear().range([ margin, width - margin ]),
     y = d3.scale.linear().range([ margin, height - margin]);
 
-var pcdata, coord, stations, backgrounds;
+var stations, backgrounds, mapPath;
 
-d3.json("us.topo.json", function(error, topology) {
-  if (error) throw error;
-  svg.append('g')
+var APP_MODES = {MAP: 'MAP', DIM: 'DIM'}
+var appState = {
+  data: [],
+  mode: APP_MODES.MAP
+}
+
+
+var q = d3.queue()
+    .defer(d3.json, 'us.topo.json')
+    .defer(d3.csv, 'coords-us.csv')
+    .defer(d3.csv, 'us_pc_alldata.csv')
+    .awaitAll(function(error, results) {
+      if (error) { 
+        console.log('error', error)
+        throw error;
+      }
+      var topology = results[0], 
+          coords = results[1],
+          pcData = results[2];
+      
+      coords.forEach(function(coord, i) {
+        appState.data.push(Object.assign(coord, pcData[i]))
+
+      }) 
+      console.log(appState)
+
+      x.domain(d3.extent(pcData, function(d) { return parseFloat(d.PC1); }));
+      y.domain(d3.extent(pcData, function(d) { return parseFloat(d.PC2); }));
+
+
+      drawMap(topology)
+
+      drawFeatures()
+});
+
+function drawMap(topology) {
+  
+  mapPath = svg.append('g')
      .attr('class', 'map')
      .append("path")
       .datum(topojson.feature(topology, topology.objects.land))
       .attr('stroke', '#ccc')
       .attr("d", path);
-      
-  d3.csv('coords-us.csv', function(error, cdata) {
-    coords = cdata;
 
-    var stationG = svg.append('g')
-          .attr('class','stations')
+}
+
+function drawFeatures() {
+
+  var stationG = svg.append('g')
+            .attr('class','stations')
 
 
-    backgrounds = stationG
-      .selectAll('.background')
-      .data(coords).enter()
+  backgrounds = stationG
+    .selectAll('.background')
+    .data(appState.data).enter()
+    .append('g')
+    .attr('id', function(d) { return 'area-'+cssSafeId(d);})
+    .attr('transform', function(d) {
+      return 'translate('+x(parseFloat(d.PC1))+','+y(parseFloat(d.PC2))+')'
+    })
+    .attr('fill', function(d) { return 'url(#grad' + d.cluster + ')'})
+
+  stations = stationG
+    .selectAll('.station')
+    .data(appState.data).enter()
+    .append('g')
+    .attr('transform', function(d) {
+      var coord =[-parseFloat(d.Longitude), parseFloat(d.Latitude)];
+      var p = projection(coord); 
+      return p ? 'translate('+p[0]+','+p[1]+')' : 'translate(0,0)';
+    })
+    .attr('id', function(d) { return cssSafeId(d);})
+    .on('mouseover', function(d) {
+      if(appState.mode === APP_MODES.DIM) {
+        d3.select('#arrow-' + cssSafeId(d)).transition().duration(300).style('opacity', 1)
+        d3.select('#map-point-' + cssSafeId(d)).transition().duration(300).style('opacity', 1)
+        mapPath.transition().duration(300).style('opacity', 0.6);
+
+      }
+    })
+    .on('mouseout', function(d) {
+      if(appState.mode === APP_MODES.DIM) {
+        d3.select('#arrow-' + cssSafeId(d)).transition().duration(300).style('opacity', 0)
+        d3.select('#map-point-' + cssSafeId(d)).transition().duration(300).style('opacity', 0)
+        mapPath.transition().duration(300).style('opacity', 0.2);
+
+      }
+    })
+    
+
+
+    stations.append('circle')
+    .attr('class', 'point')
+    .attr('r', 1)
+    .attr('cx', 0)
+    .attr('cy', 0)
+    .attr('stroke', function(d) { return clusterColors(d.cluster)})
+    
+
+    backgrounds.append('circle')
+    .attr('class', 'area')
+    .attr('r', 70)
+    .attr('cx', 0)
+    .attr('cy', 0); 
+
+    arrows = stationG
+      .selectAll('.arrow')
+      .data(appState.data).enter()
       .append('g')
-      .attr('transform', function(d) {
+
+
+
+    arrows.append('path')
+      .classed('arrow', true)
+      .attr('stroke', function(d) { return clusterColors(d.cluster)})
+      .attr('id',  function(d) { return 'arrow-'+cssSafeId(d)})
+      .attr('d', function(d) {
         var coord =[-parseFloat(d.Longitude), parseFloat(d.Latitude)];
-        var p = projection(coord); 
-        return p ? 'translate('+p[0]+','+p[1]+')' : 'translate(0,0)';
+        var p = projection(coord);
+        var offset = Math.abs(p[0] - x(d.PC1)) > 100 ? 100 : 10
+        if( p[0] < x(d.PC1)) {
+          offset = -offset
+        }
+        var path = 'M '+p[0]+' '+p[1]+' C '+(p[0]-offset)+' '+p[1]+', '+(x(d.PC1)+offset)+' '+y(d.PC2)+', '+x(d.PC1)+' '+y(d.PC2)
+        console.log(p[0] , x(d.PC1), p[0] > x(d.PC1) , offset)
+        return path
       })
-      .attr('id', function(d) { return 'area-'+d.Station.toLowerCase().replace(/[^a-z]/gi,'');})
 
-    stations = stationG
-      .selectAll('.station')
-      .data(coords).enter()
-      .append('g')
-      .attr('transform', function(d) {
-        var coord =[-parseFloat(d.Longitude), parseFloat(d.Latitude)];
-        var p = projection(coord); 
-        return p ? 'translate('+p[0]+','+p[1]+')' : 'translate(0,0)';
-      })
-      .attr('id', function(d) { return d.Station.toLowerCase().replace(/[^a-z]/gi,'');})
-      /*
-      .on('mouseenter', function(d ,i) {
-          //console.log(d3.select(this), d3.select(this).select('text'));
-          d3.select(this).select('text').style('fill', 'black');
-      });
-      */
-
-
-      stations.append('circle')
-      .attr('class', 'point')
+    arrows.append('circle')
+      .attr('id',  function(d) { return 'map-point-'+cssSafeId(d)})
+      .attr('class', 'map-point')
       .attr('r', 1)
-      .attr('cx', 0)
-      .attr('cy', 0); 
-      
-
-      backgrounds.append('circle')
-      .attr('class', 'area')
-      .attr('r', 70)
-      .attr('cx', 0)
-      .attr('cy', 0); 
-      
-      
-      stations.append('text')
-        .text(function(d) { return d.Station })
-        .attr('x', 4)
-        .attr('y', 4)
-      
-  });
-  
-});
-
-d3.csv('us_pc_alldata.csv', function(error, pcd) {
-  
-  pcdata = pcd;
-
-  x.domain(d3.extent(pcdata, function(d) { return parseFloat(d.PC1); }));
-  y.domain(d3.extent(pcdata, function(d) { return parseFloat(d.PC2); }));
-
-});
-
-
-var showPCData = function() {
-        pcdata.forEach(function(station) {
-            var cId = station.stations.toLowerCase().replace(/[^a-z]/gi,'');
-            var stationEl = d3.select('#'+cId);
-            var areaEl = d3.select('#area-'+cId);
-
-
-            stationEl.transition().duration(1500)
-              .attr('transform', 'translate('+x(parseFloat(station.PC1))+','+y(parseFloat(station.PC2))+')')
-              .attr('fill', clusterColors(station.cluster));
-
-
-            //TODO dynamic radial gradiant defs for colors scale: http://jsfiddle.net/Qh9X5/1110/ 
-            areaEl//.transition().duration(1500)
-              .attr('transform', 'translate('+x(parseFloat(station.PC1))+','+y(parseFloat(station.PC2))+')')
-              .attr('fill', "url(#grad" + station.cluster + ")")
-            areaEl.select('.area').transition().delay(500).duration(1000)
-              //.attr('fill', clusterColors(station.cluster))
-              .style('opacity', 0.3);
-        });
-        d3.select('.map path').transition().duration(1500).style('opacity', .15);
-
-}
-
-var showMap = function() {
-
-
-     stations.transition().duration(1500).attr('transform', function(d) {
+      .attr('cx', function(d) {
         var coord =[-parseFloat(d.Longitude), parseFloat(d.Latitude)];
-        var p = projection(coord); 
-        return p ? 'translate('+p[0]+' '+p[1]+')' : 'translate(0,0)';
-      });
-     // console.log(backgrounds.data())
-     // backgrounds.select('g').attr('transform', function(d) {
-     //    var coord =[-parseFloat(d.Longitude), parseFloat(d.Latitude)];
-     //    var p = projection(coord); 
-     //    return p ? 'translate('+p[0]+' '+p[1]+')' : 'translate(0,0)';
-     //  });
+        var p = projection(coord);
+        return p[0]
+      })
+      .attr('cy', function(d) {
+        var coord =[-parseFloat(d.Longitude), parseFloat(d.Latitude)];
+        var p = projection(coord);
+        return p[1]
+      })
+    .attr('stroke', function(d) { return clusterColors(d.cluster)})
 
-      backgrounds.select('.area').transition().duration(1000)
-          .style('opacity', 0);
-      d3.select('.map path').transition().duration(1500).style('opacity', 1);
+
+    
+    stations.selectAll('text').data([0, 1]).enter().append('text')
+      .text(function(d) { return d3.select(this.parentNode).datum().Station })
+      .attr('x', 4)
+      .attr('y', 4)
+      .attr('class', function(d) { return d ? 'label' : 'shadow' })
+      .attr('stroke', function(d) { return d ? 'none' : '#FFF'})
+      .attr('stroke-opacity', function(d) { return d ? 0 : 0.5})
+      .attr('fill-opacity', function(d) { return d ? 1 : 0})
 }
+
+function updateFeatures() {
+
+
+
+  stations.transition().duration(1500).attr('transform', function(d) {
+    if(appState.mode === APP_MODES.MAP) {
+      var coord =[-parseFloat(d.Longitude), parseFloat(d.Latitude)];
+      var p = projection(coord); 
+      return p ? 'translate('+p[0]+' '+p[1]+')' : 'translate(0,0)';
+    }
+    else {
+      return 'translate('+x(parseFloat(d.PC1))+','+y(parseFloat(d.PC2))+')'
+    }
+  })
+  .attr('fill', function(d) { return clusterColors(parseInt(d.cluster)) })
+
+
+  backgrounds.select('.area').transition().duration(1000)
+      .style('opacity', appState.mode === APP_MODES.DIM ? 1 : 0);
+  
+  mapPath.transition().duration(1500).style('opacity', appState.mode === APP_MODES.DIM ? 0.2 : 1);
+
+
+}
+
+function cssSafeId(d) {
+  return d.Station.toLowerCase().replace(/[^a-z]/gi,'')
+}
+
 document.querySelector('#chk').addEventListener('click', function(e) {
   if(e.target.checked) {
-    showPCData();
+    appState.mode = APP_MODES.DIM
   }
   else {
-    showMap();
+    appState.mode = APP_MODES.MAP
   }
+  updateFeatures()
 });
+
+
+// assign pollyfill
+if (typeof Object.assign != 'function') {
+  Object.assign = function(target, varArgs) { // .length of function is 2
+    'use strict';
+    if (target == null) { // TypeError if undefined or null
+      throw new TypeError('Cannot convert undefined or null to object');
+    }
+
+    var to = Object(target);
+
+    for (var index = 1; index < arguments.length; index++) {
+      var nextSource = arguments[index];
+
+      if (nextSource != null) { // Skip over if undefined or null
+        for (var nextKey in nextSource) {
+          // Avoid bugs when hasOwnProperty is shadowed
+          if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
+            to[nextKey] = nextSource[nextKey];
+          }
+        }
+      }
+    }
+    return to;
+  };
+}
 
 
 </script>
