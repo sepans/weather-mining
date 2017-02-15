@@ -20,12 +20,17 @@ text {
   font-size: 8px;
   font-family: open-sans, sans-serif, arial;
 }
+.stations text:hover {
+  fill: #222;
+}
+.info {
+  margin-top: 5px;
+}
 </style>
 <body>
   <h1>Non-geographical weather map of US</h1>
-  Method: <a href="method.html">PCA and KMeans on historical tempreture data</a>
-  <br>
   <label>Cluster weather data: </label><input id="chk" type="checkbox"/>
+  <div class="info">Method: <a href="method.html" target="_black">PCA and KMeans on historical tempreture data</a></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/1.6.19/topojson.min.js"></script>
