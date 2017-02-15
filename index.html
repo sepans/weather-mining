@@ -75,10 +75,11 @@ grads.append("stop").attr("offset", "0%").style("stop-color", function(d, i) { r
 grads.append("stop").attr("offset", "10%").style("stop-color", function(d, i) { return clusterColors(i); });
 grads.append("stop").attr("offset", "100%").style("stop-color", "white").attr('stop-opacity', 0);
 
-var x = d3.scale.linear().range([ 30, width- 30 ]),
-    y = d3.scale.linear().range([50, height -30]);
+var margin = 65;
+var x = d3.scale.linear().range([ margin, width - margin ]),
+    y = d3.scale.linear().range([ margin, height - margin]);
 
-var pcdata, coord, stations;
+var pcdata, coord, stations, backgrounds;
 
 d3.json("us.topo.json", function(error, topology) {
   if (error) throw error;
@@ -92,14 +93,29 @@ d3.json("us.topo.json", function(error, topology) {
   d3.csv('coords-us.csv', function(error, cdata) {
     coords = cdata;
 
-    stations = svg.append('g')
-      .attr('class','stations')
-      .selectAll('.station').data(coords).enter()
+    var stationG = svg.append('g')
+          .attr('class','stations')
+
+
+    backgrounds = stationG
+      .selectAll('.background')
+      .data(coords).enter()
       .append('g')
       .attr('transform', function(d) {
         var coord =[-parseFloat(d.Longitude), parseFloat(d.Latitude)];
         var p = projection(coord); 
-        return p ? 'translate('+p[0]+' '+p[1]+')' : 'translate(0,0)';
+        return p ? 'translate('+p[0]+','+p[1]+')' : 'translate(0,0)';
+      })
+      .attr('id', function(d) { return 'area-'+d.Station.toLowerCase().replace(/[^a-z]/gi,'');})
+
+    stations = stationG
+      .selectAll('.station')
+      .data(coords).enter()
+      .append('g')
+      .attr('transform', function(d) {
+        var coord =[-parseFloat(d.Longitude), parseFloat(d.Latitude)];
+        var p = projection(coord); 
+        return p ? 'translate('+p[0]+','+p[1]+')' : 'translate(0,0)';
       })
       .attr('id', function(d) { return d.Station.toLowerCase().replace(/[^a-z]/gi,'');})
       /*
@@ -109,17 +125,20 @@ d3.json("us.topo.json", function(error, topology) {
       });
       */
 
+
       stations.append('circle')
       .attr('class', 'point')
       .attr('r', 1)
       .attr('cx', 0)
       .attr('cy', 0); 
       
-      stations.append('circle')
+
+      backgrounds.append('circle')
       .attr('class', 'area')
       .attr('r', 70)
       .attr('cx', 0)
       .attr('cy', 0); 
+      
       
       stations.append('text')
         .text(function(d) { return d.Station })
@@ -144,17 +163,20 @@ var showPCData = function() {
         pcdata.forEach(function(station) {
             var cId = station.stations.toLowerCase().replace(/[^a-z]/gi,'');
             var stationEl = d3.select('#'+cId);
+            var areaEl = d3.select('#area-'+cId);
 
 
             stationEl.transition().duration(1500)
-              .attr('transform', 'translate('+x(parseFloat(station.PC1))+' '+y(parseFloat(station.PC2))+')')
-            stationEl.transition().delay(1000).duration(300)
+              .attr('transform', 'translate('+x(parseFloat(station.PC1))+','+y(parseFloat(station.PC2))+')')
               .attr('fill', clusterColors(station.cluster));
 
-            //TODO dynamic radial gradiant defs for colors scale: http://jsfiddle.net/Qh9X5/1110/  
-            stationEl.select('.area').transition().delay(500).duration(1000)
-              //.attr('fill', clusterColors(station.cluster))
+
+            //TODO dynamic radial gradiant defs for colors scale: http://jsfiddle.net/Qh9X5/1110/ 
+            areaEl//.transition().duration(1500)
+              .attr('transform', 'translate('+x(parseFloat(station.PC1))+','+y(parseFloat(station.PC2))+')')
               .attr('fill', "url(#grad" + station.cluster + ")")
+            areaEl.select('.area').transition().delay(500).duration(1000)
+              //.attr('fill', clusterColors(station.cluster))
               .style('opacity', 0.3);
         });
         d3.select('.map path').transition().duration(1500).style('opacity', .15);
@@ -169,7 +191,14 @@ var showMap = function() {
         var p = projection(coord); 
         return p ? 'translate('+p[0]+' '+p[1]+')' : 'translate(0,0)';
       });
-      stations.select('.area').transition().duration(1000)
+     // console.log(backgrounds.data())
+     // backgrounds.select('g').attr('transform', function(d) {
+     //    var coord =[-parseFloat(d.Longitude), parseFloat(d.Latitude)];
+     //    var p = projection(coord); 
+     //    return p ? 'translate('+p[0]+' '+p[1]+')' : 'translate(0,0)';
+     //  });
+
+      backgrounds.select('.area').transition().duration(1000)
           .style('opacity', 0);
       d3.select('.map path').transition().duration(1500).style('opacity', 1);
 }
