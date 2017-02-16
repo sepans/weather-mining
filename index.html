@@ -276,7 +276,7 @@ function updateFeatures() {
   .attr('fill', function(d) { return clusterColors(parseInt(d.cluster)) })
 
 
-  backgrounds.select('.area').transition().duration(1000)
+  backgrounds.select('.area').transition().delay(appState.mode === APP_MODES.DIM ? 1000 : 0).duration(500)
       .style('opacity', appState.mode === APP_MODES.DIM ? 1 : 0);
   
   mapPath.transition().duration(1500).style('opacity', appState.mode === APP_MODES.DIM ? 0.2 : 1);
