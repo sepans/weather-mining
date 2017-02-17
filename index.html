@@ -277,7 +277,7 @@ function updateFeatures() {
 
 
   backgrounds.select('.area').transition().delay(appState.mode === APP_MODES.DIM ? 1000 : 0).duration(500)
-      .style('opacity', appState.mode === APP_MODES.DIM ? 1 : 0);
+      .style('opacity', appState.mode === APP_MODES.DIM ? 0.3 : 0);
   
   mapPath.transition().duration(1500).style('opacity', appState.mode === APP_MODES.DIM ? 0.2 : 1);
 
